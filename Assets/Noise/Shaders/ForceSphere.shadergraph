@@ -165,7 +165,11 @@
             "m_Id": "412db7c4e38c4b97b4cb865c625b143b"
         }
     ],
-    "m_StickyNoteDatas": [],
+    "m_StickyNoteDatas": [
+        {
+            "m_Id": "0e71283693b8436fbfaa4a47a85ef017"
+        }
+    ],
     "m_Edges": [
         {
             "m_OutputSlot": {
@@ -1150,6 +1154,26 @@
     "m_PreviewMode": 0,
     "m_CustomColors": {
         "m_SerializableColors": []
+    }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.StickyNoteData",
+    "m_ObjectId": "0e71283693b8436fbfaa4a47a85ef017",
+    "m_Title": "Based on tutorial by Hovl Studio",
+    "m_Content": "link: https://www.youtube.com/watch?v=i2w0p_mV8_g&t=2s",
+    "m_TextSize": 0,
+    "m_Theme": 0,
+    "m_Position": {
+        "serializedVersion": "2",
+        "x": -1843.0,
+        "y": -4.0,
+        "width": 200.0,
+        "height": 160.0
+    },
+    "m_Group": {
+        "m_Id": ""
     }
 }
 
