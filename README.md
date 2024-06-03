@@ -11,4 +11,6 @@ Includes subgraph nodes for each type of noise, an hlsl file with noise function
 - [X] Simple noise (1D/2D/3D/4D)
 - [X] "Perlin" noise (1D/2D/3D/4D)
 - [ ] Simplex noise (1D/2D/3D/4D)
-- [ ] Voronoi noise (1D/2D/3D/4D)
+- [X] Voronoi noise (1D/2D/3D/4D)
+- [ ] Voronoi Edge (1D/2D/3D/4D)(WIP)
+- [ ] Voronoi Smooth Edge (1D/2D/3D/4D)(WIP)
