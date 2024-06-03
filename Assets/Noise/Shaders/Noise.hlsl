@@ -1,38 +1,4 @@
-float random(float value)
-{
-    return frac(sin(value) * 2746313);
-}
-
-float random2D(float2 value)
-{
-    //make value smaller to avoid artefacts
-    float2 smallValue = sin(value);
-    //get scalar value from 2d vector
-    float random = dot(smallValue, float2(13.37, 42.0));
-    //make value more random by making it bigger and then taking the factional part
-    return frac(sin(random) * 2746313);
-}
-
-float random3D(float3 value)
-{
-    //make value smaller to avoid artefacts
-    float3 smallValue = sin(value);
-    //get scalar value from 3d vector
-    float random = dot(smallValue, float3(13.37, 42.0, 22.8));
-    //make value more random by making it bigger and then taking the factional part
-    return frac(sin(random) * 2746313);
-}
-
-float random4D(float4 value)
-{
-    //make value smaller to avoid artefacts
-    float4 smallValue = sin(value);
-    //get scalar value from 4d vector
-    float random = dot(smallValue, float4(13.37, 42.0, 22.8, 69.69));
-    //make value more random by making it bigger and then taking the factional part
-    return frac(sin(random) * 2746313);
-}
-
+#include "Random.hlsl"
 float Noise(float value, float scale)
 {
     value *= scale;
@@ -165,4 +131,222 @@ float Perlin4D(float4 value, float scale)
     float octave5 = Noise4D(value, scale * 0.125) * 0.5;
 
     return octave1 + octave2 + octave3 + octave4 + octave5;
+}
+
+// circular
+float smin( float a, float b, float k )
+{
+    k *= 1.0/(1.0-sqrt(0.5));
+    float h = max( k-abs(a-b), 0.0 )/k;
+    return min(a,b) - k*0.5*(1.0+h-sqrt(1.0-h*(h-2.0)));
+}
+
+float Voronoi(float value, float offset, float scale, out float cell)
+{
+    value *= scale;
+    float id = floor(value);
+    float localValue = frac(value);
+    float nearestCellPoint = 0.0;
+    
+    float resultDistance = 10.0;
+    
+    for (int x = -1; x <= 1; x++)
+    {
+        //float cellPoint = sin(random(id + x) * offset) * 0.5 + 0.5;
+        float cellPoint = random(id + x);
+        float distance = cellPoint + x - localValue;
+        if (distance < resultDistance)
+        {
+            resultDistance = distance;
+            nearestCellPoint = cellPoint;
+        }
+    }
+
+    cell = nearestCellPoint;
+    return resultDistance;
+}
+
+float Voronoi2D(float2 value, float offset, float scale, out float2 cell)
+{
+    value *= scale;
+    float2 id = floor(value);
+    float2 localValue = frac(value);
+    float2 nearestCellPoint = 0.0;
+    
+    float resultDistance = 10.0;
+    
+    for (int x = -1; x <= 1; x++)
+    {
+        for (int y = -1; y <= 1; y++)
+        {
+            float2 cellOffset = float2(x, y);
+            float2 cellPoint = sin(_2Drandom2D(id + cellOffset) * offset) * 0.5 + 0.5;
+            float distance = length(cellPoint + cellOffset - localValue);
+            if (distance < resultDistance)
+            {
+                resultDistance = distance;
+                nearestCellPoint = cellPoint;
+            }
+        }
+    }
+
+    cell = nearestCellPoint;
+    return resultDistance;
+}
+
+float Voronoi3D(float3 value, float offset, float scale, out float3 cell)
+{
+    value *= scale;
+    float3 id = floor(value);
+    float3 localValue = frac(value);
+    float3 nearestCellPoint = 0.0;
+    
+    float resultDistance = 10.0;
+    
+    for (int x = -1; x <= 1; x++)
+    {
+        for (int y = -1; y <= 1; y++)
+        {
+            for (int z = -1; z <= 1; z++)
+            {
+                float3 cellOffset = float3(x, y, z);
+                float3 cellPoint = sin(_3Drandom3D(id + cellOffset) * offset) * 0.5 + 0.5;
+                float distance = length(cellPoint + cellOffset - localValue);
+                if (distance < resultDistance)
+                {
+                    resultDistance = distance;
+                    nearestCellPoint = cellPoint;
+                }
+            }
+        }
+    }
+
+    cell = nearestCellPoint;
+    return resultDistance;
+}
+
+float Voronoi4D(float4 value, float offset, float scale, out float4 cell)
+{
+    value *= scale;
+    float4 id = floor(value);
+    float4 localValue = frac(value);
+    float4 nearestCellPoint = 0.0;
+    
+    float resultDistance = 10.0;
+    
+    for (int x = -1; x <= 1; x++)
+    {
+        for (int y = -1; y <= 1; y++)
+        {
+            for (int z = -1; z <= 1; z++)
+            {
+                for (int w = -1; w <= 1; w++)
+                {
+                    float4 cellOffset = float4(x, y, z, w);
+                    float4 cellPoint = sin(_4Drandom4D(id + cellOffset) * offset) * 0.5 + 0.5;
+                    float distance = length(cellPoint + cellOffset - localValue);
+                    if (distance < resultDistance)
+                    {
+                        resultDistance = distance;
+                        nearestCellPoint = cellPoint;
+                    }
+                }
+            }
+        }
+    }
+
+    cell = nearestCellPoint;
+    return resultDistance;
+}
+
+float Voronoi2DEdge(float2 value, float offset, float scale, out float2 cell)
+{
+    value *= scale;
+    float2 id = floor(value);
+    float2 localValue = frac(value);
+    
+    float resultDistance = 10.0;
+    float2 nearestCellPoint = 0.0;
+    float2 nearestCellOffset = 0.0;
+    float2 toNearestCellPoint = 0.0;
+    
+    for (int x = -1; x <= 1; x++)
+    {
+        for (int y = -1; y <= 1; y++)
+        {
+            float2 cellOffset = float2(x, y);
+            float2 cellPoint = sin(_2Drandom2D(id + cellOffset) * offset) * 0.5 + 0.5;
+            float distance = length(cellPoint + cellOffset - localValue);
+            if (distance < resultDistance)
+            {
+                resultDistance = distance;
+                nearestCellOffset = cellOffset;
+                toNearestCellPoint = cellPoint + cellOffset - localValue;
+                nearestCellPoint = cellPoint;
+            }
+        }
+    }
+
+    cell = nearestCellPoint;
+    
+    resultDistance = 10.0;
+    for (int x = -2; x <= 2; x++)
+    {
+        for (int y = -2; y <= 2; y++)
+        {
+            float2 cellOffset = nearestCellOffset + float2(x, y);
+            float2 cellPoint = sin(_2Drandom2D(id + cellOffset) * offset) * 0.5 + 0.5;
+            float2 toCellPoint = cellPoint + cellOffset - localValue;
+            float distanceToEdge = dot((toCellPoint + toNearestCellPoint) * 0.5, normalize(toCellPoint - toNearestCellPoint));
+            resultDistance = min(resultDistance, distanceToEdge);
+        }
+    }
+    
+    return resultDistance;
+}
+
+float Voronoi2DEdgeSmooth(float2 value, float offset, float scale, float smoothness, out float2 cell)
+{
+    value *= scale;
+    float2 id = floor(value);
+    float2 localValue = frac(value);
+    
+    float resultDistance = 10.0;
+    float2 nearestCellPoint = 0.0;
+    float2 nearestCellOffset = 0.0;
+    float2 toNearestCellPoint = 0.0;
+    
+    for (int x = -1; x <= 1; x++)
+    {
+        for (int y = -1; y <= 1; y++)
+        {
+            float2 cellOffset = float2(x, y);
+            float2 cellPoint = sin(_2Drandom2D(id + cellOffset) * offset) * 0.5 + 0.5;
+            float distance = length(cellPoint + cellOffset - localValue);
+            if (distance < resultDistance)
+            {
+                resultDistance = distance;
+                nearestCellOffset = cellOffset;
+                toNearestCellPoint = cellPoint + cellOffset - localValue;
+                nearestCellPoint = cellPoint;
+            }
+        }
+    }
+
+    cell = nearestCellPoint;
+    
+    resultDistance = 10.0;
+    for (int x = -2; x <= 2; x++)
+    {
+        for (int y = -2; y <= 2; y++)
+        {
+            float2 cellOffset = nearestCellOffset + float2(x, y);
+            float2 cellPoint = sin(_2Drandom2D(id + cellOffset) * offset) * 0.5 + 0.5;
+            float2 toCellPoint = cellPoint + cellOffset - localValue;
+            float distanceToEdge = dot((toCellPoint + toNearestCellPoint) * 0.5, normalize(toCellPoint - toNearestCellPoint));
+            resultDistance = smin(resultDistance, distanceToEdge, smoothness);
+        }
+    }
+    
+    return resultDistance;
 }
